@@ -1,5 +1,7 @@
 package software.ulpgc.kata5.control;
 
+import software.ulpgc.kata5.io.*;
+import software.ulpgc.kata5.model.Pokemon;
 import software.ulpgc.kata5.view.MainFrame;
 
 import javax.imageio.ImageIO;
@@ -8,21 +10,24 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.net.URL;
 
-import static com.google.gson.internal.bind.TypeAdapters.URI;
-
 public class EnterNewPokemonCommand implements Command {
-    private MainFrame mainFrame;
+    private final MainFrame mainFrame;
+    private final PokemonLoader pokemonLoader;
 
     public EnterNewPokemonCommand(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
+        this.pokemonLoader = new ApiPokemonLoader(
+                new ApiPokemonReader(),
+                new ApiPokemonDeserializer(),
+                new ApiPokemonAdapter()
+        );
     }
 
     @Override
     public void execute() {
-        /*
-        String pokemon = mainFrame.getTextInput();
-        mainFrame.updatePokemonInfo(pokemon, stringToImageIcon("https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/4.png"));
-         */
+        String pokemonName = mainFrame.getTextInput();
+        Pokemon pokemon = pokemonLoader.load(pokemonName);
+        mainFrame.updatePokemonInfo(pokemon.name(), stringToImageIcon(pokemon.imageUrl()));
     }
 
     private ImageIcon stringToImageIcon(String imageUrl) {
